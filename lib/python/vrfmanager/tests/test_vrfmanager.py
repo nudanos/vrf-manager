@@ -8,7 +8,7 @@ import vrfmanager
 import unittest
 from unittest.mock import MagicMock, patch
 import subprocess
-from imp import reload
+from importlib import reload
 
 class TestVrf(unittest.TestCase):
         @classmethod
