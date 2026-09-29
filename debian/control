@@ -1,21 +1,22 @@
 Source: vrf-manager
-Section: contrib/net
-Priority: extra
-Maintainer: Vyatta Package Maintainers <DL-vyatta-help@att.com>
-Build-Depends:
- debhelper (>= 9),
- bvnos-linux-libc-dev,
+Section: net
+Priority: optional
+Maintainer: NuDanOS Maintainers <jon@fernandez.tech>
+Build-Depends: debhelper-compat (= 13),
+ linux-libc-dev,
  dh-python,
- python-setuptools,
- python3-all,
  python3-setuptools,
-Standards-Version: 3.9.6
+ python3-all
+Standards-Version: 4.7.2
 X-Python3-Version: >= 3.2
+Rules-Requires-Root: no
+Vcs-Git: https://github.com/nudanos/vrf-manager.git
+Vcs-Browser: https://github.com/nudanos/vrf-manager
 
 Package: libvyatta-vrfmanager-perl
 Architecture: all
-Section: contrib/perl
-Depends:
+Section: perl
+Depends: 
  libreadonly-perl,
  linux-image-vrf,
  ${perl:Depends},
@@ -29,7 +30,7 @@ Package: libvyatta-vrfmanager-sh
 Architecture: all
 Replaces: vyatta-routing-v1-yang (<< 0.2)
 Breaks: vyatta-routing-v1-yang (<< 0.2)
-Depends:
+Depends: 
  libvyatta-vrfmanager-perl,
  ${perl:Depends},
  ${misc:Depends} 
@@ -38,8 +39,8 @@ Description: vyatta-vrfmanager-sh module
 
 Package: python3-vrfmanager
 Architecture: all
-Section: contrib/python
-Depends:
+Section: python
+Depends: 
  libvyatta-vrfmanager-perl,
  ${python3:Depends},
  ${misc:Depends}
@@ -51,15 +52,15 @@ Package: libvrfmanager-vyatta-dev
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
-Section: contrib/libdevel
+Section: libdevel
 Depends: ${misc:Depends}
 Description: vrfmanager-vyatta-dev module
  Vrf manager C libraries
 
 Package: vrf-manager
 Architecture: all
-Section: contrib/perl
-Depends:
+Section: perl
+Depends: 
  libvyatta-vrfmanager-perl,
  libvyatta-config-perl,
  linux-image-vrf,
@@ -73,9 +74,9 @@ Description: VRF Manager core and utilities
 
 Package: chvrf
 Architecture: all
-Section: contrib/perl
+Section: perl
 Provides: chvrf-utility
-Depends:
+Depends: 
  libvyatta-vrfmanager-perl,
  iproute2 (>= 4.14.1-0vyatta3),
  iproute2 (<< 4.15) | iproute2 (>= 4.15.0-0vyatta2),
