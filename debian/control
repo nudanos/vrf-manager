@@ -18,7 +18,7 @@ Architecture: all
 Section: perl
 Depends: 
  libreadonly-perl,
- linux-image-vrf,
+ linux-image-vrf | vyatta-kernel-forwarding,
  ${perl:Depends},
  ${misc:Depends}
 Breaks: libvyatta-vrfmanager-perl-upstream (<< 3.0)
@@ -63,7 +63,7 @@ Section: perl
 Depends: 
  libvyatta-vrfmanager-perl,
  libvyatta-config-perl,
- linux-image-vrf,
+ linux-image-vrf | vyatta-kernel-forwarding,
  iproute2 (>= 4.10.0-1),
  ${perl:Depends},
  ${misc:Depends}
@@ -80,7 +80,7 @@ Depends:
  libvyatta-vrfmanager-perl,
  iproute2 (>= 4.14.1-0vyatta3),
  iproute2 (<< 4.15) | iproute2 (>= 4.15.0-0vyatta2),
- linux-image-vrf,
+ linux-image-vrf | vyatta-kernel-forwarding,
  ${perl:Depends},
  ${misc:Depends}
 Breaks: chvrf-upstream (<< 3.0)
