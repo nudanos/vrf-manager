@@ -11,7 +11,7 @@ package Vyatta::VrfManagerWriter;
 use strict;
 use warnings;
 
-use Exporter qw(import);
+use Exporter   qw(import);
 use File::Temp qw(tempfile);
 
 my $FILE = "/run/route-domain.conf";
@@ -59,7 +59,10 @@ sub unset_vrf_map {
     my @file_lines = get_vrf_lines();
     ( my $temp_fh, my $temp_fname ) = tempfile( DIR => "/run" );
     foreach my $line (@file_lines) {
-        print {$temp_fh} $line unless ( $line =~ /^$vrf_name $pbr_tbl_id / );
+
+        # a prefix test, not a regex: the name is not a pattern
+        print {$temp_fh} $line
+          unless ( index( $line, "$vrf_name $pbr_tbl_id " ) == 0 );
     }
     close $temp_fh;
     chmod 0644, $temp_fname;

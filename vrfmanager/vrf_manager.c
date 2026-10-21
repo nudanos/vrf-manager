@@ -54,7 +54,7 @@ static int getwords(char *line, char *words[], int maxwords)
 static int getlinecount(FILE *fp)
 {
 	int count = 0;
-	char c;
+	int c;    /* int: getc returns EOF, which no char holds */
 
 	for (c = getc(fp); c != EOF; c = getc(fp))
 		if (c == '\n')
@@ -98,7 +98,7 @@ bool
 get_vrf_name_upstream(vrfid_t vrf_id, char **vrf_name)
 {
 	DIR *dir;
-	struct dirent *de;
+	const struct dirent *de;
 	bool ret = false;
 
 	if (vrf_id == VRFID_INVALID)
@@ -167,7 +167,8 @@ get_vrf_list(struct vrf_map **list)
 	/* The mappings might have been added or deleted by the time the list is
 	 * filled. We are ignoring the newly added mappings as we have enough
 	 * memory for only nvrf mappings */
-	while (getline(&line, &len, fp) != -1 && count <= nvrf) {
+	/* count < nvrf: p has room for nvrf entries, no more */
+	while (getline(&line, &len, fp) != -1 && count < nvrf) {
 		char *words[2] = {0};
 
 		if (getwords(line, words, 2) == 2) {
@@ -214,10 +215,9 @@ get_vrf_kernel_table_id_upstream(const char* vrf_name, tableid_t pbr_tid)
 
 	while (getline(&line, &len, fp) != -1)	{
 		char *words[3] = {0};
-		tableid_t tid;
 
 		if (getwords(line, words, 3) == 3) {
-			tid = atol(words[1]);
+			tableid_t tid = atol(words[1]);
 			if (tid == pbr_tid && strcmp(vrf_name, words[0]) == 0) {
 				ret = atol(words[2]);
 				break;

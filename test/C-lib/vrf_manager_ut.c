@@ -21,7 +21,7 @@ TEST_START(vrf_manager_ut_valid_id_upstream)
 	/* Test if correct name is returned when a valid id is given. */
 	char *name = NULL;
 	vrfid_t id = 10;
-	char *expected_name = "blue";
+	const char *expected_name = "blue";
 
 	assert(get_vrf_name_upstream(id, &name));
 	ASSERT_IF_NAME_NOT_SAME(expected_name, name);

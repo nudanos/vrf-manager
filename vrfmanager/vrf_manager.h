@@ -28,7 +28,9 @@ typedef uint32_t vrfid_t;
 typedef uint32_t tableid_t;
 
 struct vrf_map {
+	// cppcheck-suppress unusedStructMember ; reason: public API, filled by get_vrf_list for its callers
 	char vrf_name[VRF_NAME_SIZE];
+	// cppcheck-suppress unusedStructMember ; reason: public API, filled by get_vrf_list for its callers
 	vrfid_t vrf_id;
 };
 

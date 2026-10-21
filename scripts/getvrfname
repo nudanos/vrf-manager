@@ -1,6 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
+
+use strict;
+use warnings;
 
 use lib "/opt/vyatta/share/perl5/";
 use Vyatta::VrfManager qw(get_vrf_id get_vrf_name get_vrf_list);
 
-print get_vrf_name($ARGV[0]) if defined $ARGV[0];
+print get_vrf_name( $ARGV[0] ) if defined $ARGV[0];

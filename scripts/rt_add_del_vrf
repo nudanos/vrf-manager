@@ -8,7 +8,7 @@ SNMP_V3_CONFIG_SCRIPT="/opt/vyatta/sbin/vyatta-snmp-v3.pl"
 is_service_running ()
 {
     local SERVICE=$1
-    systemctl -q is-active ${SERVICE}
+    systemctl -q is-active "${SERVICE}"
     RET=$?
     return $RET
 }
@@ -18,9 +18,10 @@ reconfigure_snmp ()
     if is_service_running ${SNMPD_SERVICE}; then
         if ${SNMP_CONFIG_SCRIPT} --update-snmp; then
             # Update SNMP V3 config and start snmpd
-            engineid=$((cat /var/lib/snmp/snmpd.conf | grep oldEngineID| sed -re 's/oldEngineID/--oldEngineID/') 2>/dev/null)
-            serialno=$((cat /var/lib/snmp/snmpd.conf | grep setserialno| sed -re 's/setserialno/--setserialno/') 2>/dev/null)
+            engineid=$(grep oldEngineID /var/lib/snmp/snmpd.conf 2>/dev/null | sed -re 's/oldEngineID/--oldEngineID/')
+            serialno=$(grep setserialno /var/lib/snmp/snmpd.conf 2>/dev/null | sed -re 's/setserialno/--setserialno/')
             extra_options="$engineid $serialno"
+            # shellcheck disable=SC2086 # reason: the options are split into their words on purpose
             ${SNMP_V3_CONFIG_SCRIPT} --update-snmp $extra_options
             if is_service_running ${SNMPD_SERVICE}; then
                 if [ -f /etc/init.d/vyatta-snmp-vrf-agent ] ; then
@@ -46,9 +47,9 @@ reconfigure_snmp ()
 configure_vrf ()
 {
     local ADD_or_DEL=$1
-    local VRF="${@:2}"
+    local vrfs=("${@:2}")
     if is_service_running ${ROUTING_SERVICE} ; then
-        for vrf in "$VRF"; do
+        for vrf in "${vrfs[@]}"; do
             if [ "$ADD_or_DEL" == "add" ]; then
                 vrfid=$(getvrfid "$vrf")
                 tblid=$(getvrftable --pbr-table "$vrf" 254)
@@ -64,7 +65,7 @@ configure_vrf ()
     fi
 }
 
-if [[ -z "$@" ]]; then
+if [ $# -eq 0 ]; then
     exit
 fi
 configure_vrf "$@"

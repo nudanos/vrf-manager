@@ -24,8 +24,7 @@ Readonly::Scalar our $VRFMASTER_PREFIX => "vrf";
 my $FILE = "/run/route-domain.conf";
 use Exporter qw(import);
 
-our @EXPORT_OK =
-  qw(get_vrf_id get_vrf_name get_vrf_list get_vrf_name_map get_tbl_id_map
+our @EXPORT_OK = qw(get_vrf_id get_vrf_name get_vrf_list get_vrf_name_map get_tbl_id_map
   get_interface_vrf_id get_interface_vrf update_interface_vrf
   $VRFID_INVALID $VRFID_DEFAULT $VRFNAME_NONE $VRFNAME_DEFAULT $VRFMASTER_PREFIX
   $VRFNAME_MAX_LEN);
@@ -34,12 +33,11 @@ our @EXPORT_OK =
 
 # Mangle the list into the form that users expect, i.e. "<name> <id>\n"
 sub get_vrf_list {
+
     # Using the name hash ensures we get uniqueness of the names
     my $vrf_hash = get_vrf_name_map();
 
-    return map {
-        $_ . " " . get_vrf_id($_) . "\n"
-    } keys %$vrf_hash;
+    return map { $_ . " " . get_vrf_id($_) . "\n" } keys %$vrf_hash;
 }
 
 sub get_vrf_id {
@@ -69,12 +67,13 @@ sub get_vrf_name {
         return $VRFNAME_NONE;
     }
 
-    opendir(my $dh, "/sys/class/net") || return $VRFNAME_NONE;
-    foreach my $intf (readdir $dh) {
-        if (substr($intf, 0, length($VRFMASTER_PREFIX)) eq $VRFMASTER_PREFIX &&
-            get_vrf_id(substr($intf, length($VRFMASTER_PREFIX))) == $vrf_id) {
+    opendir( my $dh, "/sys/class/net" ) || return $VRFNAME_NONE;
+    foreach my $intf ( readdir $dh ) {
+        if ( substr( $intf, 0, length($VRFMASTER_PREFIX) ) eq $VRFMASTER_PREFIX
+            && get_vrf_id( substr( $intf, length($VRFMASTER_PREFIX) ) ) == $vrf_id )
+        {
             closedir $dh;
-            return substr($intf, length($VRFMASTER_PREFIX));
+            return substr( $intf, length($VRFMASTER_PREFIX) );
         }
     }
     closedir $dh;
@@ -82,14 +81,15 @@ sub get_vrf_name {
     return $VRFNAME_NONE;
 }
 
-my $vrf_pat = qr/^(\S+)\s+(\d+)\s+(\d+).*$/;
+my $vrf_pat = qr/^(\S+)\s+(\d+)\s+(\d+).*$/x;
+
 # returns a reference to hash
 # vrfname => pbr-table => kernel-table
 sub get_vrf_name_map {
     my %name_hash;
-    foreach my $line (read_file($FILE, 'err_mode' => 'quiet')) {
-        my ($name, $pbr_table, $kernel_table) = ($line =~ /$vrf_pat/);
-	$name_hash{$name}{$pbr_table} = $kernel_table;
+    foreach my $line ( read_file( $FILE, 'err_mode' => 'quiet' ) ) {
+        my ( $name, $pbr_table, $kernel_table ) = ( $line =~ /$vrf_pat/x );
+        $name_hash{$name}{$pbr_table} = $kernel_table;
     }
     return \%name_hash;
 }
@@ -98,9 +98,9 @@ sub get_vrf_name_map {
 # kernel-table => (vrf-name, pbr-table)
 sub get_tbl_id_map {
     my %table_hash;
-    foreach my $line (read_file($FILE, 'err_mode' => 'quiet')) {
-	my ($name, $pbr_table, $kernel_table) = ($line =~ /$vrf_pat/);
-	$table_hash{$kernel_table} = [$name, $pbr_table];
+    foreach my $line ( read_file( $FILE, 'err_mode' => 'quiet' ) ) {
+        my ( $name, $pbr_table, $kernel_table ) = ( $line =~ /$vrf_pat/x );
+        $table_hash{$kernel_table} = [ $name, $pbr_table ];
     }
     return \%table_hash;
 }
@@ -108,7 +108,7 @@ sub get_tbl_id_map {
 # Get the VRF ID for an interface
 sub get_interface_vrf_id {
     my $intf = shift;
-    my $vrf = get_interface_vrf($intf);
+    my $vrf  = get_interface_vrf($intf);
 
     return get_vrf_id($vrf);
 }
@@ -116,13 +116,14 @@ sub get_interface_vrf_id {
 # Get the VRF name for an interface
 # Returns
 sub get_interface_vrf {
-    my $intf = shift;
+    my $intf        = shift;
     my $master_path = readlink "/sys/class/net/$intf/master";
-    my $master = $VRFNAME_DEFAULT;
+    my $master      = $VRFNAME_DEFAULT;
+
     # Strip off $VRFMASTER_PREFIX from master device name to get VRF
-    $master = substr(basename($master_path), length($VRFMASTER_PREFIX)) if
-        defined($master_path) &&
-        substr(basename($master_path), 0, length($VRFMASTER_PREFIX)) eq $VRFMASTER_PREFIX;
+    $master = substr( basename($master_path), length($VRFMASTER_PREFIX) )
+      if defined($master_path)
+      && substr( basename($master_path), 0, length($VRFMASTER_PREFIX) ) eq $VRFMASTER_PREFIX;
     return $master;
 }
 
@@ -130,9 +131,10 @@ sub get_interface_vrf {
 sub is_bridge_port {
     my $ifname = shift;
 
-    if (-d "/sys/class/net/$ifname/brport") {
+    if ( -d "/sys/class/net/$ifname/brport" ) {
         return 1;
-    } else {
+    }
+    else {
         return 0;
     }
 }
@@ -143,12 +145,13 @@ sub is_bonding_slave {
 
     # check IFF_ flags
     my $IFF_SLAVE = 0x800;
-    my @lines = read_file("/sys/class/net/$ifname/flags", chomp => 1);
-    my $flags = hex($lines[0]);
+    my @lines     = read_file( "/sys/class/net/$ifname/flags", chomp => 1 );
+    my $flags     = hex( $lines[0] );
 
-    if ($flags & $IFF_SLAVE) {
+    if ( $flags & $IFF_SLAVE ) {
         return 1;
-    } else {
+    }
+    else {
         return 0;
     }
 }
@@ -163,23 +166,24 @@ sub update_interface_vrf {
     # Deferred config
     return 0 if !-d "/sys/class/net/$ifname";
 
-    if (is_bridge_port($ifname)) {
-        if ($vrf ne '' && $vrf ne 'default') {
+    if ( is_bridge_port($ifname) ) {
+        if ( $vrf ne '' && $vrf ne 'default' ) {
             warn "Cannot change bridge interface $ifname to $vrf\n";
         }
         return 1;
-    } elsif (is_bonding_slave($ifname)) {
-        if ($vrf ne '' && $vrf ne 'default') {
+    }
+    elsif ( is_bonding_slave($ifname) ) {
+        if ( $vrf ne '' && $vrf ne 'default' ) {
             warn "Cannot change bonding slave interface $ifname to $vrf\n";
-         }
-         return 1;
+        }
+        return 1;
     }
 
     if ($intf_up) {
-        system("ip", "link", "set", "dev", $ifname, "down") == 0
+        system( "ip", "link", "set", "dev", $ifname, "down" ) == 0
           or warn "Cannot change interface $ifname state down\n";
     }
-    if ($vrf eq '' || $vrf eq 'default') {
+    if ( $vrf eq '' || $vrf eq 'default' ) {
         $rc = system "ip", "link", "set", "dev", $ifname, "nomaster";
     }
     else {
@@ -187,7 +191,7 @@ sub update_interface_vrf {
     }
     warn "Cannot change interface $ifname to $vrf\n" unless $rc == 0;
     if ($intf_up) {
-        system ("ip", "link", "set", "dev", $ifname, "up") == 0
+        system( "ip", "link", "set", "dev", $ifname, "up" ) == 0
           or warn "Cannot change interface $ifname state up\n";
     }
     return $rc == 0;

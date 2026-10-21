@@ -9,9 +9,8 @@
 """Python3 vrf-manager library APIs."""
 
 import os
-import re
-import subprocess
 import os.path
+import subprocess
 
 vrfid_invalid = 0
 vrfid_default = 1
@@ -19,12 +18,17 @@ vrfname_none = ""
 vrfname_default = "default"
 vrf_master_prefix = "vrf"
 
+
 class VrfManagerException(BaseException):
     pass
 
-class Vrf(object):
+
+class Vrf:
     """ Represents parameters of a single VRF """
+
     def __init__(self, rd_id, name, interface_num, interfaces_set=None):
+        # the count comes from interfaces_set; the argument stays for callers
+        del interface_num
         self._rd_id = int(rd_id)
         self._name = name
         self._interfaces_set = interfaces_set \
@@ -57,12 +61,12 @@ class Vrf(object):
         return interface_s in self.interfaces
 
 
-class VrfManager(object):
+class VrfManager:
     """ Vrf manager python 3 library class """
 
     @staticmethod
     def get_vrf_master_interface(vrf_name):
-        return "{}{}".format(vrf_master_prefix, vrf_name)
+        return f"{vrf_master_prefix}{vrf_name}"
 
     def __init__(self, filepath="/run/route-domain.conf"):
         # No longer used
@@ -72,10 +76,10 @@ class VrfManager(object):
         """ Internal API to get the lines from getvrflist """
         output = ""
         try:
-            output = subprocess.check_output([ "/usr/sbin/getvrflist" ],
+            output = subprocess.check_output(["/usr/sbin/getvrflist"],
                                              universal_newlines=True)
         except Exception as e:
-            raise VrfManagerException("Failed to parse VRFs: {}".format(e))
+            raise VrfManagerException(f"Failed to parse VRFs: {e}") from e
         return output.split(os.linesep)
 
     def get_vrf_id(self, name):
@@ -93,8 +97,7 @@ class VrfManager(object):
                 continue
             if token[0] == name:
                 return int(token[1].rstrip())
-        else:
-            return vrfid_invalid
+        return vrfid_invalid
 
     def get_vrf_name(self, rd_id):
         """ get_vrf_name will return the VRF name corresponding to
@@ -111,8 +114,7 @@ class VrfManager(object):
                 continue
             if int(token[1].rstrip()) == rd_id:
                 return token[0]
-        else:
-            return vrfname_none
+        return vrfname_none
 
     def get_vrf_list(self):
         """ This member API will return all the mappings as yield of pair.
@@ -130,8 +132,9 @@ class VrfManager(object):
         """
         Returns a dictionary of Vrf objects representing all running VRFs
 
-        The dictionary is keyed by both name and id, ie. assuming a VRF with id 2
-        and name "foo"; the key 2 and "foo" will return the same Vrf object
+        The dictionary is keyed by both name and id, ie. assuming a VRF with
+        id 2 and name "foo"; the key 2 and "foo" will return the same Vrf
+        object
 
         Note that keys 2 and "2", ie. int(2) and str(2), MAY return
         different objects.
@@ -151,16 +154,16 @@ class VrfManager(object):
         output = ""
 
         vrfs = dict(self.get_vrf_list())
-        for vrf in vrfs.keys():
-            vrf = Vrf(vrfs[vrf], vrf, 0)
+        for name, rd_id in vrfs.items():
+            vrf = Vrf(rd_id, name, 0)
 
             try:
                 output = subprocess.check_output([
-                                "ip", "-br", "link", "list", "vrf",
-                                VrfManager.get_vrf_master_interface(vrf.name)
-                            ], universal_newlines=True)
+                    "ip", "-br", "link", "list", "vrf",
+                    VrfManager.get_vrf_master_interface(vrf.name)
+                ], universal_newlines=True)
             except Exception as e:
-                raise VrfManagerException("Failed to parse VRFs: {}".format(e))
+                raise VrfManagerException(f"Failed to parse VRFs: {e}") from e
             for line in output.split(os.linesep):
                 intf = line[:16].rstrip()
                 if len(intf) == 0:

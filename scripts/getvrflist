@@ -12,6 +12,6 @@ GetOptions( 'name-only' => \$nameonly );
 
 my @vrflist = get_vrf_list();
 if ($nameonly) {
-    @vrflist = map { s/^(\S+)\s+.*/$1/; $_ } @vrflist;
+    @vrflist = map { s/^(\S+)\s+.*/$1/rx } @vrflist;
 }
 print @vrflist;
