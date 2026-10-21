@@ -1,3 +1,14 @@
+vrf-manager (3.3) trixie; urgency=medium
+
+  * Code-quality lint fixes (distro docs/porting.md): analyzer findings
+    fixed, see the git log.
+  * Among them: get_vrf_list could write one entry past its buffer, and
+    getlinecount kept getc's result in a char.
+  * rt_add_del_vrf loops over each VRF name it is given, not over all of
+    them joined into one.
+
+ -- NuDanOS Maintainers <jon@fernandez.tech>  Wed, 21 Oct 2026 07:01:13 +0000
+
 vrf-manager (3.2) trixie; urgency=medium
 
   * Port to Debian 13 (trixie): debhelper-compat 13, Standards-Version 4.7.2, Rules-Requires-Root, NuDanOS Vcs.
